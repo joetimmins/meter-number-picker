@@ -243,30 +243,24 @@ class MeterNumberPicker : View {
         val currentValueStart = (y + currentScrollOffset).toInt()
         val prevValueStart = currentValueStart - measuredHeight
         val nextValueStart = currentValueStart + measuredHeight
-        canvas.drawText(getValue(currentValueOffset + 1).toString() + "", x, prevValueStart.toFloat(), textPaint)
-        canvas.drawText(getValue(currentValueOffset).toString() + "", x, currentValueStart.toFloat(), textPaint)
-        canvas.drawText(getValue(currentValueOffset - 1).toString() + "", x, nextValueStart.toFloat(), textPaint)
+        canvas.drawText(getValue(currentValueOffset + 1).toString(), x, prevValueStart.toFloat(), textPaint)
+        canvas.drawText(getValue(currentValueOffset).toString(), x, currentValueStart.toFloat(), textPaint)
+        canvas.drawText(getValue(currentValueOffset - 1).toString(), x, nextValueStart.toFloat(), textPaint)
     }
 
     // =============================================================================================
     // ----------------------------------- TOUCH & SCROLL ------------------------------------------
     // =============================================================================================
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!isEnabled) {
-            return false
-        }
-        if (velocityTracker == null) {
-            velocityTracker = VelocityTracker.obtain()
-        }
+        if (!isEnabled) return false
+
+        if (velocityTracker == null) velocityTracker = VelocityTracker.obtain()
+
         velocityTracker!!.addMovement(event)
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
-                if (!flingScroller!!.isFinished) {
-                    flingScroller!!.forceFinished(true)
-                }
-                if (!adjustScroller!!.isFinished) {
-                    adjustScroller!!.forceFinished(true)
-                }
+                if (!flingScroller!!.isFinished) flingScroller!!.forceFinished(true)
+                if (!adjustScroller!!.isFinished) adjustScroller!!.forceFinished(true)
                 lastDownEventY = event.y
 
                 // Disallow ScrollView to intercept touch events.
@@ -281,9 +275,7 @@ class MeterNumberPicker : View {
             MotionEvent.ACTION_UP -> {
                 velocityTracker!!.computeCurrentVelocity(1000, maximumFlingVelocity.toFloat())
                 val initialVelocity = velocityTracker!!.yVelocity.toInt()
-                if (abs(initialVelocity) > minimumFlingVelocity) {
-                    fling(initialVelocity)
-                } else {
+                if (abs(initialVelocity) > minimumFlingVelocity) fling(initialVelocity) else {
                     val rawScrollOffset = (lastDownOrMoveEventY - lastDownEventY).toInt()
                     val measuredHeight = measuredHeight
                     val adjustedValueOffset = calculateAdjustedValueOffset(rawScrollOffset, measuredHeight)
