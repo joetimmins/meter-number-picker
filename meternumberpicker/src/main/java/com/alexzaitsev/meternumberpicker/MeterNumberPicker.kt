@@ -182,25 +182,15 @@ class MeterNumberPicker : View {
     private fun measureWidth(widthMeasureSpec: Int): Int {
         val specMode = MeasureSpec.getMode(widthMeasureSpec)
         val specSize = MeasureSpec.getSize(widthMeasureSpec)
-        val result: Int
-        result = if (specMode == MeasureSpec.EXACTLY) {
-            specSize
-        } else {
-            minWidth.coerceAtLeast(calculateTextWidthWithInternalPadding()) + paddingLeft + paddingRight
-        }
-        return result
+        return if (specMode == MeasureSpec.EXACTLY) specSize
+        else minWidth.coerceAtLeast(calculateTextWidthWithInternalPadding()) + paddingLeft + paddingRight
     }
 
     private fun measureHeight(heightMeasureSpec: Int): Int {
         val specMode = MeasureSpec.getMode(heightMeasureSpec)
         val specSize = MeasureSpec.getSize(heightMeasureSpec)
-        val result: Int
-        result = if (specMode == MeasureSpec.EXACTLY) {
-            specSize
-        } else {
-            minHeight.coerceAtLeast(calculateTextHeightWithInternalPadding()) + paddingTop + paddingBottom
-        }
-        return result
+        return if (specMode == MeasureSpec.EXACTLY) specSize
+        else minHeight.coerceAtLeast(calculateTextHeightWithInternalPadding()) + paddingTop + paddingBottom
     }
 
     private fun calculateTextWidthWithInternalPadding() =
