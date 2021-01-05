@@ -26,11 +26,12 @@ class MeterNumberPicker : View {
     private var minValue = DEFAULT_MIN_VALUE
     private var maxValue = DEFAULT_MAX_VALUE
     private var value = DEFAULT_VALUE
-    private var textPaint: Paint? = null
+    private lateinit var textPaint: Paint
     private var textColor = DEFAULT_TEXT_COLOR
     private var textSize = DEFAULT_TEXT_SIZE_SP
     private var order = DEFAULT_ORDER
     private var typeface: Typeface? = null
+    private var wraparoundEventListener: WraparoundEventListener? = null
 
     /**
      * Current Y scroll offset
@@ -211,7 +212,7 @@ class MeterNumberPicker : View {
     private fun calculateTextWidth(): Int {
         var maxDigitWidth = 0f
         for (i in 0..9) {
-            val digitWidth = textPaint!!.measureText(formatNumberWithLocale(i))
+            val digitWidth = textPaint.measureText(formatNumberWithLocale(i))
             if (digitWidth > maxDigitWidth) {
                 maxDigitWidth = digitWidth
             }
@@ -227,7 +228,7 @@ class MeterNumberPicker : View {
 
     private fun calculateTextHeight(): Int {
         val bounds = Rect()
-        textPaint!!.getTextBounds("0", 0, 1, bounds)
+        textPaint.getTextBounds("0", 0, 1, bounds)
         return bounds.height().also { textHeight = it }
     }
 
@@ -242,9 +243,9 @@ class MeterNumberPicker : View {
         val currentValueStart = (y + currentScrollOffset).toInt()
         val prevValueStart = currentValueStart - measuredHeight
         val nextValueStart = currentValueStart + measuredHeight
-        canvas.drawText(getValue(currentValueOffset + 1).toString() + "", x, prevValueStart.toFloat(), textPaint!!)
-        canvas.drawText(getValue(currentValueOffset).toString() + "", x, currentValueStart.toFloat(), textPaint!!)
-        canvas.drawText(getValue(currentValueOffset - 1).toString() + "", x, nextValueStart.toFloat(), textPaint!!)
+        canvas.drawText(getValue(currentValueOffset + 1).toString() + "", x, prevValueStart.toFloat(), textPaint)
+        canvas.drawText(getValue(currentValueOffset).toString() + "", x, currentValueStart.toFloat(), textPaint)
+        canvas.drawText(getValue(currentValueOffset - 1).toString() + "", x, nextValueStart.toFloat(), textPaint)
     }
 
     // =============================================================================================
@@ -381,33 +382,24 @@ class MeterNumberPicker : View {
     private fun getValue(offset: Int): Int {
         val distance = maxValue - minValue + 1
         val result = getResult(offset, distance)
-        if (result < minValue) {
-            return result + distance
-        } else if (result > maxValue) {
-            return result - distance
+        return when {
+            result < minValue -> result + distance
+            result > maxValue -> result - distance
+            else -> result
         }
-        return result
     }
 
     private fun getResult(offset: Int, distance: Int): Int {
-        return if (order == 0) {
-            value - offset % distance
-        } else {
-            value + offset % distance
-        }
+        val i = offset % distance
+        return if (order == 0) value - i else value + i
     }
 
-    private fun formatNumberWithLocale(value: Int): String {
-        return String.format(Locale.getDefault(), "%d", value)
-    }
+    private fun formatNumberWithLocale(value: Int) =
+        String.format(Locale.getDefault(), "%d", value)
 
-    private fun dpToPx(dp: Float): Float {
-        return dp * resources.displayMetrics.density
-    }
+    private fun dpToPx(dp: Float) = dp * resources.displayMetrics.density
 
-    private fun spToPx(sp: Float): Float {
-        return sp * resources.displayMetrics.scaledDensity
-    }
+    private fun spToPx(sp: Float) = sp * resources.displayMetrics.scaledDensity
 
     // =============================================================================================
     // --------------------------------- GETTERS & SETTERS -----------------------------------------
@@ -457,7 +449,7 @@ class MeterNumberPicker : View {
 
     fun setTypeface(typeface: Typeface?) {
         this.typeface = typeface ?: Typeface.DEFAULT
-        textPaint!!.typeface = this.typeface
+        textPaint.typeface = this.typeface
     }
 
     fun setTypeface(string: String?, style: Int) {
@@ -531,6 +523,10 @@ class MeterNumberPicker : View {
         return typeface
     }
 
+    fun attachWraparoundEventListener(listener: WraparoundEventListener) {
+        wraparoundEventListener = listener
+    }
+
     companion object {
         private const val DEFAULT_MIN_HEIGHT_DP = 20
         private const val DEFAULT_MIN_WIDTH_DP = 14
@@ -553,4 +549,13 @@ class MeterNumberPicker : View {
          */
         private const val MAX_FLING_VELOCITY_ADJUSTMENT = 6
     }
+}
+
+enum class WraparoundEvent {
+    MAX_TO_MIN,
+    MIN_TO_MAX
+}
+
+fun interface WraparoundEventListener {
+    fun onWraparoundEvent(event: WraparoundEvent)
 }
