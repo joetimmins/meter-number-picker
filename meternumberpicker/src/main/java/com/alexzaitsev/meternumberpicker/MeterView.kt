@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.LinearLayout
+import androidx.core.view.children
 import kotlin.math.pow
 
 class MeterView : LinearLayout {
@@ -91,14 +92,13 @@ class MeterView : LinearLayout {
         }
         set(value) {
             var newValue = value
-            var koeff = childCount
-            for (i in 0 until childCount) {
-                val picker = getChildAt(i) as MeterNumberPicker
-                val pow = 10.0.pow((--koeff).toDouble())
-                val number = (newValue / pow).toInt()
-                require(!(i == 0 && number > 9)) { "Number of digits cannot be greater then pickers number" }
-                newValue -= (number * 10.0.pow(koeff.toDouble())).toInt()
-                picker.setValue(number)
+            children.forEachIndexed { index, view ->
+                val coefficient = childCount - index - 1
+                val placeValue = 10.0.pow(coefficient)
+                val number = (newValue / placeValue).toInt()
+                require(!(index == 0 && number > 9)) { "Number of digits cannot be greater then pickers number" }
+                newValue -= (number * placeValue).toInt()
+                (view as MeterNumberPicker).setValue(number)
             }
         }
 

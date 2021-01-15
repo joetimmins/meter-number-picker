@@ -405,8 +405,8 @@ class MeterNumberPicker : View {
     }
 
     fun setValue(value: Int) {
-        require(value >= minValue) { "value must be >= minValue" }
-        require(value <= maxValue) { "value must be <= maxValue" }
+        require(value >= minValue) { "value must be >= $minValue but was $value" }
+        require(value <= maxValue) { "value must be <= $maxValue but was $value" }
         this.value = value
         invalidate()
     }
