@@ -83,8 +83,8 @@ class MeterView : LinearLayout {
         get() {
             var result = 0
             children.forEachIndexed { index, view ->
-                val coefficient = childCount - index - 1
-                val placeValue = 10.0.pow(coefficient).toInt()
+                val exponent = childCount - index - 1
+                val placeValue = 10.0.pow(exponent).toInt()
                 val number = (view as MeterNumberPicker).getValue() * placeValue
                 result += number
             }
@@ -93,8 +93,8 @@ class MeterView : LinearLayout {
         set(value) {
             var newValue = value
             children.forEachIndexed { index, view ->
-                val coefficient = childCount - index - 1
-                val placeValue = 10.0.pow(coefficient).toInt()
+                val exponent = childCount - index - 1
+                val placeValue = 10.0.pow(exponent).toInt()
                 val number = newValue / placeValue
                 require(!(index == 0 && number > 9)) { "Number of digits cannot be greater then pickers number" }
                 newValue -= number * placeValue
