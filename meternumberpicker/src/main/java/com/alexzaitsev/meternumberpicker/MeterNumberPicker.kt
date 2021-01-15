@@ -412,7 +412,7 @@ class MeterNumberPicker : View {
     }
 
     fun setTextColorInt(@ColorInt color: Int) {
-        textPaint!!.color = color.also { textColor = it }
+        textPaint.color = color.also { textColor = it }
         invalidate()
     }
 
@@ -421,7 +421,7 @@ class MeterNumberPicker : View {
     }
 
     fun setTextSizePx(size: Float) {
-        textPaint!!.textSize = size.also { textSize = it }
+        textPaint.textSize = size.also { textSize = it }
         invalidate()
     }
 
