@@ -82,11 +82,11 @@ class MeterView : LinearLayout {
     var value: Int
         get() {
             var result = 0
-            var koeff = childCount
-            for (i in 0 until childCount) {
-                val picker = getChildAt(i) as MeterNumberPicker
-                val pow = 10.0.pow((--koeff).toDouble())
-                result += (picker.getValue() * pow).toInt()
+            children.forEachIndexed { index, view ->
+                val coefficient = childCount - index - 1
+                val placeValue = 10.0.pow(coefficient)
+                val value1 = (view as MeterNumberPicker).getValue() * placeValue
+                result += value1.toInt()
             }
             return result
         }
