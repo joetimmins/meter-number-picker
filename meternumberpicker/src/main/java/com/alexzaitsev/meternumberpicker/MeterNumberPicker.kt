@@ -10,6 +10,7 @@ import android.graphics.Typeface
 import android.os.Build
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
@@ -242,6 +243,8 @@ class MeterNumberPicker : View {
     // ----------------------------------- TOUCH & SCROLL ------------------------------------------
     // =============================================================================================
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        Log.d("TAG", "event: downtime: ${event.downTime}, event time: ${event.eventTime}, action: ${event.action}, metastate: ${event.metaState}")
+
         if (!isEnabled) return false
 
         if (velocityTracker == null) velocityTracker = VelocityTracker.obtain()
@@ -267,7 +270,6 @@ class MeterNumberPicker : View {
                 val initialVelocity = velocityTracker!!.yVelocity.toInt()
                 if (abs(initialVelocity) > minimumFlingVelocity) fling(initialVelocity) else {
                     val rawScrollOffset = (lastDownOrMoveEventY - lastDownEventY).toInt()
-                    val measuredHeight = measuredHeight
                     val adjustedValueOffset = calculateAdjustedValueOffset(rawScrollOffset, measuredHeight)
                     calculateCurrentOffsets(rawScrollOffset, measuredHeight)
                     value = getValue(adjustedValueOffset)
@@ -285,18 +287,18 @@ class MeterNumberPicker : View {
     }
 
     override fun computeScroll() {
-        var scroller = flingScroller
-        if (scroller!!.isFinished) {
-            scroller = adjustScroller
-            if (scroller!!.isFinished) {
-                return
-            }
+        val scroller = when {
+            flingScroller?.isFinished == false -> flingScroller!!
+            adjustScroller?.isFinished == false -> adjustScroller!!
+            else -> return
         }
+
         scroller.computeScrollOffset()
         val currentScrollerY = scroller.currY
         val diffScrollY = scrollerLastY - currentScrollerY
         currentScrollOffset -= diffScrollY
         scrollerLastY = currentScrollerY
+
         if (adjustScroller!!.isFinished) {
             if (flingScroller!!.isFinished) {
                 if (currentScrollOffset != 0) {
@@ -351,11 +353,9 @@ class MeterNumberPicker : View {
     }
 
     private fun fling(velocity: Int) {
-        if (velocity > 0) {
-            flingScroller!!.fling(0, 0.also { scrollerLastY = it }, 0, velocity, 0, 0, 0, Int.MAX_VALUE)
-        } else {
-            flingScroller!!.fling(0, Int.MAX_VALUE.also { scrollerLastY = it }, 0, velocity, 0, 0, 0, Int.MAX_VALUE)
-        }
+        val startY = if (velocity > 0) 0 else Int.MAX_VALUE
+        flingScroller!!.fling(0, startY, 0, velocity, 0, 0, 0, Int.MAX_VALUE)
+        scrollerLastY = startY
     }
 
     // =============================================================================================
